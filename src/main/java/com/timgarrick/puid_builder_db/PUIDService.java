@@ -28,13 +28,29 @@ public class PUIDService {
 
     private String generatePuidName(PUID puid) {
         //Generate a new puidname + 3 digits
-        String partialPuidname = puid.getSurname().toLowerCase() + puid.getFirstname().toLowerCase().charAt(0);
+        String partialPuidname;
+
+        //total PUID length cannot exceed 20 characters
+        if(puid.getSurname().length() >= 16){
+            partialPuidname = puid.getSurname().toLowerCase().substring(0,16)
+                            + puid.getFirstname().toLowerCase().charAt(0);
+        } else {
+            partialPuidname = puid.getSurname().toLowerCase() + puid.getFirstname().toLowerCase().charAt(0);
+        }
+
         List<PUID> listOfPuids = puidRepo.findByPUIDName(partialPuidname);
 
         if(!listOfPuids.isEmpty()) {
             String lastMatchingPuidname = listOfPuids.get(0).getPuidname();
-            int lastThreeDigits = Integer.parseInt(lastMatchingPuidname.substring(lastMatchingPuidname.length()-3));
-            partialPuidname = partialPuidname + (lastThreeDigits+1);
+            int lastThreeDigits = Integer.parseInt(lastMatchingPuidname
+                                                    .substring(lastMatchingPuidname.length()-3));
+            if(lastThreeDigits < 999) {
+                partialPuidname = partialPuidname + (lastThreeDigits+1);
+            } else {
+                partialPuidname = partialPuidname + "X" + (lastThreeDigits+1);
+            }
+
+
         } else {
             partialPuidname = partialPuidname + "100";
         }
